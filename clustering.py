@@ -8,10 +8,25 @@ import pandas as pd
 
 
 def compute_new_centroid(assigned_points):
+    """
+    Given a list of points assigned to a centroid, this function will return
+    the point which is the average of all the points.
+    """
+    
+    assert type(assigned_points) == list and type(assigned_points[0]) == list, "assigned_points must be a list of lists"
+    num_points = len(assigned_points)
     dimensions = len(assigned_points[0])
+    assert num_points > 0 and dimensions > 0, "There must be at least 1 data point with at least 1 dimension"
+    # Should probably include more checks that dimensions are all the same, etc.
+    
     new_centroid = [0] * dimensions # Go ahead and initialize the list
-    for dimension in dimensions:
-        return
+    for dimension in range(dimensions):
+        avg = 0
+        for point in assigned_points:
+            avg += point[dimension]
+        avg /= num_points
+        new_centroid[dimension] = avg
+    return new_centroid
 
 
 def assign_to_centroid(X,centroids):

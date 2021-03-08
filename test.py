@@ -41,6 +41,16 @@ class K_meansTest(unittest.TestCase):
                 clustering.assign_to_centroid([[1,1],[2,2],[-3,-2],[4,4],[-1,0],[-2,0]],[[2,2],[-3,-2]]), {0:[[1,1],[2,2],[4,4]],1:[[-3,-2],[-1,0],[-2,0]]}
                 )
         
+    def test_compute_new_centroid_1d(self):
+        self.assertEqual(
+                clustering.compute_new_centroid([[1],[4.5],[11]]), [5.5]
+                )
+        
+    def test_compute_new_centroid_3d(self):
+        self.assertEqual(
+            clustering.compute_new_centroid([[1,-1,8],[4.5,1,-6],[11,0,-0.5]]), [5.5,0,0.5]
+            )
+        
         
 
 unittest.main()
