@@ -9,15 +9,32 @@ import pandas as pd
 
 def k_means(X, k):
     centroids = random_init(X,k)
-    for i in range(100):
+    new_cost = float('inf')
+    for i in range(100000): # max number of iterations
+        cost = new_cost
         centroid_dict = assign_to_centroid(X,centroids)
         for key in centroid_dict:
             centroids[key] = compute_new_centroid(centroid_dict[key])
-    print(centroids)
-    print(centroid_dict)
+        new_cost = compute_cost(centroids, centroid_dict)
+        if cost - new_cost <= 1e-2:
+            break
+    return centroids, centroid_dict, centroid_dict
     
     
 def compute_cost(centroids, centroid_dict):
+    """
+    Given a list of centroids and a dictionary returned by assign_to_centroid(),
+    this function will compute the overall cost of clustering.
+    """
+    
+    assert type(centroids) == list, "centroids must be a list of lists"
+    assert len(centroids) > 0, "centroids must be non-empty"
+    assert type(centroids[0]) == list and len(centroids[0]) > 0, "centroids must be a non-empty list of lists"
+    assert type(centroid_dict) == dict, "centroid_dict must be a dictionary; see assign_to_centroid()"
+    assert len(centroid_dict) > 0, "centroid_dict cannot be empty"
+    # Should add more checks to ensure the dimension of the points in centroid_dict
+    # is the same as the dimension of the centroids
+    
     cost = 0
     for centroid in range(len(centroids)):
         center = centroids[centroid]
