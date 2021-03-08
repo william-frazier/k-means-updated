@@ -7,6 +7,25 @@ from random import randint
 import pandas as pd
 
 
+def k_means(X, k):
+    centroids = random_init(X,k)
+    for i in range(100):
+        centroid_dict = assign_to_centroid(X,centroids)
+        for key in centroid_dict:
+            centroids[key] = compute_new_centroid(centroid_dict[key])
+    print(centroids)
+    print(centroid_dict)
+    
+    
+def compute_cost(centroids, centroid_dict):
+    cost = 0
+    for centroid in range(len(centroids)):
+        center = centroids[centroid]
+        for point in centroid_dict[centroid]:
+            cost += calc_l2sq_norm(center, point)
+    return cost
+
+
 def compute_new_centroid(assigned_points):
     """
     Given a list of points assigned to a centroid, this function will return
@@ -68,7 +87,7 @@ def import_X(filename):
 
 def random_init(X,k):
     """
-    Pick k random points as centroids (no overlap).
+    Pick k random points as centroids (no overlap) and returns a list of lists.
     """
     
     assert type(k) == int and k > 0, "k must be a positive integer"

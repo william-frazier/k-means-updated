@@ -51,6 +51,16 @@ class K_meansTest(unittest.TestCase):
             clustering.compute_new_centroid([[1,-1,8],[4.5,1,-6],[11,0,-0.5]]), [5.5,0,0.5]
             )
         
+    def test_compute_cost_1d(self):
+        self.assertEqual(
+                clustering.compute_cost([[1],[3]], {0:[[1],[1.5]],1:[[3],[10],[4]]}),50.25
+                )
+        
+    def test_compute_cost_3d(self):
+        self.assertEqual(
+                clustering.compute_cost([[1,-1,4],[3,0,-4]], {0:[[1,-1,4],[1.5,-2,2]],1:[[3,0,-4],[10,-1,-5],[4,10,-1]]}), 166.25
+                )
+        
         
 
 unittest.main()
