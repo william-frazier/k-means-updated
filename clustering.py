@@ -3,22 +3,38 @@
 # Project 1
 # William Frazier
 
-from random import randint
+from random import randint, choices
 import pandas as pd
+import matplotlib.pyplot as plt 
 
 
-def k_means(X, k):
-    centroids = random_init(X,k)
-    new_cost = float('inf')
+def k_means(X, k, init="random"):
+    """
+    The main controller function.
+    """
+    
+    assert type(X) == list, "X must be a list of lists"
+    assert len(X) > 0, "X cannot be empty"
+    assert type(X[0]) == list and len(X[0]) > 0, "X must be a list of lists which are non-empty"
+    assert type(k) == int and k <= len(X), "k must be an integer no larger than the size of X"
+    assert init == "random" or init == "k-means++", 'Only "random" and "k-means++" can be used to initialize the centroids'
+    
+    if init == "random":
+        centroids = random_init(X,k)
+    else:
+        centroids = k_meanspp_init(X,k)
+    new_cost = 9999999999999999999999999999999
     for i in range(100000): # max number of iterations
         cost = new_cost
         centroid_dict = assign_to_centroid(X,centroids)
         for key in centroid_dict:
             centroids[key] = compute_new_centroid(centroid_dict[key])
         new_cost = compute_cost(centroids, centroid_dict)
-        if cost - new_cost <= 1e-2:
+        if cost - new_cost <= 0.01:
+            print(f"on {init} with k={k} stopped at {i+1}")
             break
-    return centroids, centroid_dict, centroid_dict
+    return cost
+    #return centroids, centroid_dict, centroid_dict
     
     
 def compute_cost(centroids, centroid_dict):
@@ -99,7 +115,7 @@ def import_X(filename):
     """
     
     df = pd.read_csv(filename, header=None, encoding = 'utf8')
-    return df.values.tolist()
+    return df.values
 
 
 def random_init(X,k):
@@ -107,13 +123,17 @@ def random_init(X,k):
     Pick k random points as centroids (no overlap) and returns a list of lists.
     """
     
-    assert type(k) == int and k > 0, "k must be a positive integer"
+    assert type(X) == list, "X must be a list of lists"
     num_points = len(X)
+    assert num_points > 0, "X cannot be empty"
+    assert type(X[0]) == list and len(X[0]) > 0, "X must be a list of lists which are non-empty"
+    assert type(k) == int and k > 0, "k must be a positive integer"
     assert num_points >= k, "There must be at least as many data points as k"
+    
     num_centroids = 1
     # Pick a first centroid so we can set the length of the list
-    first_centroid = X[randint(0, num_points-1)]
-    centroids = [first_centroid] * k # Much faster to initialize the whole array now
+    centroid = X[randint(0, num_points-1)]
+    centroids = [centroid] * k # Much faster to initialize the whole array now
     while num_centroids < k:
         # Pick a random point to be a centroid
         centroid = X[randint(0,num_points-1)] 
@@ -124,7 +144,33 @@ def random_init(X,k):
     return centroids
 
 
-
+def k_meanspp_init(X, k):
+    """
+    Initialize the centroids using the k-means++ method.
+    """
+    
+    assert type(X) == list, "X must be a list of lists"
+    num_points = len(X)
+    assert num_points > 0, "X cannot be empty"
+    assert type(X[0]) == list and len(X[0]) > 0, "X must be a list of lists which are non-empty"
+    assert type(k) == int and k > 0, "k must be a positive integer"
+    assert num_points >= k, "There must be at least as many data points as k"
+    
+    num_centroids = 1
+    centroid = X[randint(0, num_points-1)]
+    # Pick a first centroid so we can set the length of the list
+    centroids = [centroid] * k # Much faster to initialize the whole array now
+    while num_centroids < k:
+        distance_array = [0] * num_points # Much faster to initialize the whole array now
+        for point in range(num_points):
+            distance = 999999999999999
+            for i in range(num_centroids):
+                distance = min(distance, calc_l2sq_norm(X[point], centroids[i]))
+            distance_array[point] = distance  
+        centroid = choices(X, weights=distance_array, k=1)[0] # Weighted sampling
+        centroids[num_centroids] = centroid
+        num_centroids += 1
+    return centroids
 
 def calc_l2sq_norm(x,y):
     """
@@ -140,3 +186,15 @@ def calc_l2sq_norm(x,y):
     for dimension in range(dimensions):
         distance += (x[dimension] - y[dimension])**2
     return distance
+
+#axis_x = [i for i in range(1,100)]
+#X = import_X("X.csv")
+#axis_y = [k_means(X, i) for i in range(1,100)]
+#print("finished")
+#kpp_y = [k_means(X,i,"k-means++") for i in range(1,100)]
+#
+#print(axis_y)
+#print(kpp_y)
+#plt.plot(axis_x,axis_y,label="random", color="blue")
+#plt.plot(axis_x,kpp_y,label="k++", color="red")
+
